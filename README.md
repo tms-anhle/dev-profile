@@ -10,7 +10,7 @@ Claude Code skill — Tạo **Short Bio + Core Skills** chuyên nghiệp cho dev
 - **3 mức độ match** — Hoàn toàn / Tương đối / Tổng quát
 - **3 ngôn ngữ output** — Tiếng Việt / English / 日本語
 - **Tự động lưu file** — đặt tên theo developer hoặc tuỳ chỉnh
-- **Hỗ trợ cả 2 chế độ** — interactive form hoặc CLI args
+- **Hỗ trợ cả 2 chế độ** — hỏi tuần tự bằng text hoặc CLI args
 
 ---
 
@@ -31,8 +31,8 @@ curl -fsSL https://raw.githubusercontent.com/tms-anhle/dev-profile/master/instal
 **Cách 2 — Clone về máy rồi symlink** (tiện cho việc tự chỉnh sửa skill):
 
 ```bash
-git clone https://github.com/tms-anhle/dev-profile ~/Documents/Projects/generate-short-bio
-cd ~/Documents/Projects/generate-short-bio
+git clone https://github.com/tms-anhle/dev-profile <thư-mục-tuỳ-chọn>
+cd <thư-mục-tuỳ-chọn>
 bash install.sh
 ```
 
@@ -49,7 +49,7 @@ Khởi động lại Claude Code sau khi cài.
 curl -fsSL https://raw.githubusercontent.com/tms-anhle/dev-profile/master/install.sh | bash
 
 # Nếu cài theo Cách 2 (clone)
-cd ~/Documents/Projects/generate-short-bio && git pull
+cd <thư-mục-đã-clone> && git pull
 ```
 
 ---
@@ -62,7 +62,12 @@ cd ~/Documents/Projects/generate-short-bio && git pull
 /generate-short-bio
 ```
 
-Claude sẽ hỏi lần lượt: Profile → JD → Match Level → Ngôn ngữ & tên file.
+Claude sẽ hỏi tuần tự từng câu một bằng text:
+
+1. **Thông tin member** — nhập tên, số năm kinh nghiệm, tech stack
+2. **JD khách hàng** — paste JD vào nếu có, hoặc Enter để bỏ qua
+3. **Mức độ match** — chỉ hỏi nếu có JD (1/2/3)
+4. **Ngôn ngữ & tên file** — chọn vi/en/ja và tên file output
 
 ### Chế độ CLI (có args)
 
@@ -72,7 +77,7 @@ Claude sẽ hỏi lần lượt: Profile → JD → Match Level → Ngôn ngữ 
 
 | Argument | Mô tả | Mặc định |
 |----------|-------|---------|
-| `--profile` | Path đến file profile developer (bắt buộc) | — |
+| `--profile` | Path đến file thông tin developer (bắt buộc khi dùng CLI) | — |
 | `--jd` | Path hoặc nội dung JD khách hàng | Không có |
 | `--match` | Mức độ khớp JD: `full` / `relative` / `general` | `full` nếu có JD |
 | `--lang` | Ngôn ngữ output: `vi` / `en` / `ja` | `vi` |
