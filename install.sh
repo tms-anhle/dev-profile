@@ -51,3 +51,4 @@ else
   echo "Error: Failed to download skill. Check your internet connection or repo URL."
   exit 1
 fi
+
