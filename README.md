@@ -10,7 +10,6 @@ Claude Code skill — Tạo **Short Bio + Core Skills** chuyên nghiệp cho dev
 - **3 mức độ match** — Hoàn toàn / Tương đối / Tổng quát
 - **3 ngôn ngữ output** — Tiếng Việt / English / 日本語
 - **Tự động lưu file** — đặt tên theo developer hoặc tuỳ chỉnh
-- **Hỗ trợ cả 2 chế độ** — hỏi tuần tự bằng text hoặc CLI args
 
 ---
 
@@ -69,36 +68,6 @@ Claude sẽ hỏi tuần tự từng câu một bằng text:
 3. **Mức độ match** — chỉ hỏi nếu có JD (1/2/3)
 4. **Ngôn ngữ & tên file** — chọn vi/en/ja và tên file output
 
-### Chế độ CLI (có args)
-
-```
-/generate-short-bio --profile <path> [--jd <path|text>] [--match full|relative|general] [--lang vi|en|ja] [--output <filename>]
-```
-
-| Argument | Mô tả | Mặc định |
-|----------|-------|---------|
-| `--profile` | Path đến file thông tin developer (bắt buộc khi dùng CLI) | — |
-| `--jd` | Path hoặc nội dung JD khách hàng | Không có |
-| `--match` | Mức độ khớp JD: `full` / `relative` / `general` | `full` nếu có JD |
-| `--lang` | Ngôn ngữ output: `vi` / `en` / `ja` | `vi` |
-| `--output` | Tên file lưu kết quả | Auto: `short-bio-[ten-dev].md` |
-
-### Ví dụ
-
-```bash
-# Interactive — không cần args
-/generate-short-bio
-
-# Có profile, không JD — bio tổng quát
-/generate-short-bio --profile profiles/nguyen-van-an.md
-
-# Có JD, hoàn toàn khớp, tiếng Việt
-/generate-short-bio --profile profiles/an.md --jd jd-php.md --match full --lang vi
-
-# JD tương đối khớp, output tiếng Anh, lưu file tuỳ chỉnh
-/generate-short-bio --profile profiles/an.md --jd jd-java.md --match relative --lang en --output bio-an-java.md
-```
-
 ---
 
 ## Logic match JD
@@ -136,10 +105,8 @@ Claude sẽ hỏi tuần tự từng câu một bằng text:
 
 ## Core Skills
 
-| Domain | Kỹ năng & Kinh nghiệm |
-|--------|----------------------|
-| Backend / Framework | ... |
-| Database | ... |
+Backend / Framework : ... 
+Database : ... 
 ```
 
 ---
