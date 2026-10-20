@@ -1,6 +1,6 @@
 # generate-short-bio
 
-Claude Code skill — Tạo **Short Bio + Core Skills** chuyên nghiệp cho developer, hỗ trợ tối ưu theo JD khách hàng và 3 ngôn ngữ output.
+Claude Code skill — Giúp member tự tạo **Short Bio + Core Skills** chuyên nghiệp của chính mình (viết như member tự giới thiệu), hỗ trợ tối ưu theo JD khách hàng và 3 ngôn ngữ output.
 
 ---
 
@@ -9,6 +9,7 @@ Claude Code skill — Tạo **Short Bio + Core Skills** chuyên nghiệp cho dev
 - **Match theo JD** — điều chỉnh số năm kinh nghiệm, thay thế ngôn ngữ BE, sinh skill đi kèm phù hợp cấp độ
 - **3 mức độ match** — Hoàn toàn / Tương đối / Tổng quát
 - **3 ngôn ngữ output** — Tiếng Việt / English / 日本語
+- **Văn phong tự nhiên** — Short Bio luôn được chạy qua skill [humanizer](https://github.com/blader/humanizer) trước khi xuất
 - **Tự động lưu file** — đặt tên theo developer hoặc tuỳ chỉnh
 
 ---
@@ -21,21 +22,13 @@ Claude Code skill — Tạo **Short Bio + Core Skills** chuyên nghiệp cho dev
 
 ## Cài đặt
 
-**Cách 1 — Download thẳng từ GitHub** (cài vào `~/.claude/skills/generate-short-bio/`):
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tms-anhle/dev-profile/master/install.sh | bash
 ```
 
-**Cách 2 — Clone về máy rồi symlink** (tiện cho việc tự chỉnh sửa skill):
-
-```bash
-git clone https://github.com/tms-anhle/dev-profile <thư-mục-tuỳ-chọn>
-cd <thư-mục-tuỳ-chọn>
-bash install.sh
-```
-
 Script tự phát hiện `skill.md` trong thư mục hiện tại và tạo symlink thay vì download.
+
+Script cũng tự cài skill **humanizer** vào `~/.claude/skills/humanizer/` nếu máy chưa có (đã có thì giữ nguyên).
 
 Khởi động lại Claude Code sau khi cài.
 
@@ -44,11 +37,7 @@ Khởi động lại Claude Code sau khi cài.
 ## Cập nhật
 
 ```bash
-# Nếu cài theo Cách 1
 curl -fsSL https://raw.githubusercontent.com/tms-anhle/dev-profile/master/install.sh | bash
-
-# Nếu cài theo Cách 2 (clone)
-cd <thư-mục-đã-clone> && git pull
 ```
 
 ---
@@ -63,7 +52,7 @@ cd <thư-mục-đã-clone> && git pull
 
 Claude sẽ hỏi tuần tự từng câu một bằng text:
 
-1. **Thông tin member** — nhập tên, số năm kinh nghiệm, tech stack
+1. **Thông tin của bạn** — nhập tên, role, số năm kinh nghiệm, tech stack
 2. **JD khách hàng** — paste JD vào nếu có, hoặc Enter để bỏ qua
 3. **Mức độ match** — chỉ hỏi nếu có JD (1/2/3)
 4. **Ngôn ngữ & tên file** — chọn vi/en/ja và tên file output
@@ -93,7 +82,7 @@ Claude sẽ hỏi tuần tự từng câu một bằng text:
 ## Cấu trúc output
 
 ```markdown
-## Short Bio — [Tên developer]
+## Short Bio — [Tên member]
 
 [Đoạn 1 — Nền tảng kỹ thuật]
 
@@ -113,16 +102,8 @@ Database : ...
 
 ## Gỡ cài đặt
 
-**Cách 1 — Dùng script:**
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tms-anhle/dev-profile/master/install.sh | bash -s -- --uninstall
 ```
 
-**Cách 2 — Thủ công:**
-
-```bash
-rm -rf ~/.claude/skills/generate-short-bio
-```
-
-> Nếu cài theo clone, lệnh trên chỉ xóa symlink — source code tại thư mục clone vẫn còn nguyên.
+> Skill `humanizer` không bị xóa khi gỡ (có thể skill khác đang dùng). Gỡ thủ công nếu không cần: `rm -rf ~/.claude/skills/humanizer`
