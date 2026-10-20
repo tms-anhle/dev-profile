@@ -16,6 +16,7 @@ download() {
   local tmp
   tmp="$(mktemp)"
   if curl -fsSL "$1" -o "$tmp" && [ -s "$tmp" ]; then
+    chmod 644 "$tmp"
     mv "$tmp" "$2"
   else
     rm -f "$tmp"
