@@ -1,4 +1,5 @@
 ---
+name: generate-short-bio
 description: Giúp member Tomosia tự tạo Short Bio + Core Skills chuyên nghiệp của chính mình. Hỗ trợ match JD khách hàng và 3 ngôn ngữ (vi/en/ja).
 ---
 
@@ -13,8 +14,8 @@ Thực hiện **đúng 3 bước theo thứ tự** — không bỏ qua, không �
 ## Bước 1 — Thu thập thông tin
 
 Arguments:
-- `--profile` — file thông tin của member → bỏ qua hỏi, đọc file, chuyển thẳng Bước 2.
-- `--jd` — nội dung JD
+- `--profile` — file thông tin của member (thường là file `profile-*.md` đã lưu từ lần trước) → bỏ qua Câu 1, đọc file và validate 4 field như Câu 1; vẫn hỏi Câu 2/Câu 3 nếu chưa truyền `--jd` / `--match`.
+- `--jd` — nội dung JD, hoặc đường dẫn file chứa JD (nếu giá trị là file tồn tại → đọc file)
 - `--match full|relative|general` — mặc định `full` nếu có JD
 - `--lang vi|en|ja` — mặc định `vi`, thường bỏ qua (hỏi en/ja sau khi có output)
 - `--output` — tên file (tùy chọn)
@@ -53,6 +54,23 @@ Nhập thông tin của bạn để tạo bio:
 | Tech stack chính | Ít nhất 1 ngôn ngữ hoặc framework |
 
 Nếu thiếu field nào → hỏi lại, merge, validate lại. Chỉ chuyển câu 2 khi đủ cả 4.
+
+**Lưu profile để dùng lại** — khi đủ 4 field (nhập tay, không áp dụng khi đã dùng `--profile`), lưu ngay thông tin member vào `profile-[ten-member-kebab].md` (thư mục hiện tại, ghi đè nếu đã có) — KHÔNG hỏi lại. Lưu đúng thông tin member nhập, chưa qua JD adjustment:
+```
+# Profile — [Tên đầy đủ]
+
+Role: [...]
+Số năm kinh nghiệm: [...]
+Tech stack: [...]
+Email: [...]
+Ngày sinh: [...]
+Domain: [...]
+Học vấn: [...]
+
+## Dự án nổi bật
+[nguyên văn member nhập]
+```
+Field tùy chọn không có → bỏ dòng đó. Lần sau member chỉ cần `/generate-short-bio --profile profile-[ten].md` kèm JD mới.
 
 ---
 
@@ -107,11 +125,17 @@ Xác nhận: Profile [Tên member] · JD: [có/không] · Match: [hoàn toàn/t�
 
 | Profile → JD | Xóa | Giữ | Sinh mới |
 |---|---|---|---|
+| BE → FE | Framework BE, ORM, message queue, microservices | Git, JS/TS (Node.js), REST API knowledge | FE framework theo JD + companion skills FE |
 | BE → Mobile | Framework BE, ORM, microservices | Git, JS→RN/Java→Android, DB nếu cần | Mobile platform + companion skills mobile |
 | BE → QA | Framework BE, ORM, deployment | Ngôn ngữ lập trình, Docker/CI | QA stack + companion skills QA |
+| FE → BE | FE framework, UI library, CSS tooling | Git, JS/TS→Node.js, REST API knowledge | BE framework theo JD + companion skills BE |
+| FE → Mobile | Web framework, CSS tooling, SSR | Git, React→React Native, JS/TS | Mobile platform + companion skills mobile |
+| FE → QA | FE framework, UI library | JS/TS, Cypress/Playwright, Jest | QA stack + companion skills QA |
 | Mobile → BE | Mobile SDK, UI framework, store tools | Git, API knowledge, Kotlin/Java | BE framework theo JD + companion skills BE |
+| Mobile → FE | Mobile SDK, store tools | Git, React Native→React, JS/TS (Swift/Kotlin/Dart không giữ) | FE framework theo JD + companion skills FE |
 | Mobile → QA | Mobile SDK, UI framework | Appium/mobile testing, Git | QA stack + companion skills QA |
-| QA → BE/Mobile | Testing frameworks, test management | Ngôn ngữ lập trình, CI/CD | Target role skills theo JD |
+| QA → BE/FE/Mobile | Testing frameworks, test management | Ngôn ngữ lập trình, CI/CD | Target role skills theo JD |
+| Fullstack → BE/FE | Skill phía không thuộc role JD | Skill phía khớp role JD, Git, Docker | Bổ sung companion skills của role JD |
 
 Match level áp dụng bình thường sau khi đã xác định target role.
 
@@ -140,6 +164,20 @@ Match level áp dụng bình thường sau khi đã xác định target role.
 - 5-6y: + design patterns, message queue, caching, security.
 - 7+y: + microservices, distributed systems, CI/CD nâng cao, monitoring.
 - Ví dụ: PHP 4y → Eloquent ORM (4y), PHPUnit (3y). Java 7y → Spring Cloud (5y), Kafka (4y), JUnit (6y), JWT/OAuth2 (4y).
+
+**Companion skills — Frontend** (thay framework nếu JD yêu cầu: React↔Vue↔Angular cùng danh mục; Next.js đi với React, Nuxt đi với Vue):
+- 1-2y: HTML/CSS, JavaScript/TypeScript, framework core (React/Vue/Angular), Git.
+- 3-4y: + state management (Redux/Zustand/Pinia), REST API integration, Tailwind/SCSS, Jest/Vitest.
+- 5-6y: + Next.js/Nuxt (SSR/SSG), performance (Core Web Vitals), E2E testing (Cypress/Playwright), design system/Storybook.
+- 7+y: + micro-frontend, monorepo (Nx/Turborepo), FE CI/CD, accessibility/i18n, FE architecture.
+- Ví dụ: React 3y → TypeScript (3y), Redux Toolkit (2y), Jest (2y). Vue 6y → Nuxt (4y), Pinia (3y), Playwright (2y).
+
+**Companion skills — Fullstack** (kết hợp BE + FE cùng mốc nhưng chọn lọc — chỉ lấy skill liên quan JD, không cộng dồn toàn bộ 2 danh sách):
+- 1-2y: framework BE core + framework FE core, REST API, SQL cơ bản.
+- 3-4y: + ORM, state management, Docker cơ bản, unit test cả 2 phía.
+- 5-6y: + caching, SSR, cloud deploy (AWS/GCP), CI/CD pipeline.
+- 7+y: + system design/microservices, monitoring, kiến trúc end-to-end.
+- Ví dụ: Laravel + Vue 5y → Eloquent (5y), Pinia (3y), Redis (3y), AWS (3y). Node.js + React 7y → NestJS (5y), Next.js (4y), Docker (5y), Datadog (3y).
 
 **Companion skills — Mobile** (thay platform nếu JD yêu cầu; iOS↔Android chỉ thay khi JD rõ ràng; Flutter/RN cross-platform giữ cả hai nếu hợp lý):
 - *iOS/Swift:* 1-2y: UIKit, Xcode, CocoaPods. 3-4y: + CoreData, Alamofire, Push Notification, TestFlight. 5-6y: + Combine/RxSwift, MVVM, XCTest, App Store. 7+y: + Clean Architecture, Fastlane, SPM.
@@ -289,6 +327,7 @@ Output theo định dạng chuẩn — giữ nguyên thứ tự, không bỏ sec
 | vi | en | ja |
 |----|----|----|
 | Vị trí | Position | ポジション |
+| Email | Email | メール |
 | Ngày sinh | Date of birth | 生年月日 |
 | Stack | Stack | 技術スタック |
 | Mô tả | Description | 概要 |
@@ -322,8 +361,13 @@ Bạn có muốn tạo thêm bản bằng ngôn ngữ khác không? (nhập 1 s�
 
 ## Ví dụ gọi skill
 
-# hỏi tuần tự
+```
+# lần đầu — hỏi tuần tự
 /generate-short-bio
-  → Câu 1: Profile → Câu 2: JD → Câu 3: Match (nếu có JD)
+  → Câu 1: Profile (lưu profile-[ten].md) → Câu 2: JD → Câu 3: Match (nếu có JD)
   → Sinh bio vi → humanize → in + lưu → hỏi en/ja/xong
+
+# lần sau — dùng lại profile, JD mới
+/generate-short-bio --profile profile-nguyen-van-an.md --jd jd-client-a.txt
+  → Câu 3: Match → Sinh bio → ...
 ```

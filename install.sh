@@ -5,11 +5,23 @@ REPO="tms-anhle/dev-profile"
 BRANCH="master"
 SKILL_NAME="generate-short-bio"
 SKILL_DIR="$HOME/.claude/skills/$SKILL_NAME"
-RAW_URL="https://raw.githubusercontent.com/$REPO/$BRANCH/skill.md"
+RAW_URL="https://raw.githubusercontent.com/$REPO/$BRANCH/SKILL.md"
 
 # Dependency: humanizer skill (https://github.com/blader/humanizer) — dùng để làm tự nhiên văn phong bio
 HUMANIZER_DIR="$HOME/.claude/skills/humanizer"
 HUMANIZER_URL="https://raw.githubusercontent.com/blader/humanizer/main/SKILL.md"
+
+# Tải $1 về file $2 qua file tạm — mạng đứt giữa chừng không làm hỏng file đang có
+download() {
+  local tmp
+  tmp="$(mktemp)"
+  if curl -fsSL "$1" -o "$tmp" && [ -s "$tmp" ]; then
+    mv "$tmp" "$2"
+  else
+    rm -f "$tmp"
+    return 1
+  fi
+}
 
 install_humanizer() {
   if [ -e "$HUMANIZER_DIR" ]; then
@@ -18,7 +30,7 @@ install_humanizer() {
   fi
   echo "Installing dependency: humanizer skill..."
   mkdir -p "$HUMANIZER_DIR"
-  if curl -fsSL "$HUMANIZER_URL" -o "$HUMANIZER_DIR/SKILL.md"; then
+  if download "$HUMANIZER_URL" "$HUMANIZER_DIR/SKILL.md"; then
     echo "Installed to: $HUMANIZER_DIR/SKILL.md"
   else
     rm -rf "$HUMANIZER_DIR"
@@ -26,9 +38,17 @@ install_humanizer() {
   fi
 }
 
+done_message() {
+  echo ""
+  echo "Done! Restart Claude Code and run /$SKILL_NAME to get started."
+}
+
 # Uninstall mode
 if [ "$1" = "--uninstall" ]; then
-  if [ -e "$SKILL_DIR" ]; then
+  if [ -L "$SKILL_DIR" ]; then
+    rm "$SKILL_DIR"
+    echo "Uninstalled: symlink $SKILL_DIR removed (source repo kept)."
+  elif [ -e "$SKILL_DIR" ]; then
     rm -rf "$SKILL_DIR"
     echo "Uninstalled: $SKILL_DIR removed."
   else
@@ -40,37 +60,46 @@ fi
 
 echo "Installing Claude Code skill: $SKILL_NAME"
 
+# Mode: local — chạy `bash install.sh` trong thư mục repo → symlink để sửa skill có hiệu lực ngay
+if [ -f "./SKILL.md" ] && grep -q "^name: $SKILL_NAME$" "./SKILL.md"; then
+  mkdir -p "$(dirname "$SKILL_DIR")"
+  if [ -e "$SKILL_DIR" ] && [ ! -L "$SKILL_DIR" ]; then
+    rm -rf "$SKILL_DIR"
+  fi
+  ln -sfn "$(pwd)" "$SKILL_DIR"
+  echo "Local repo detected — symlinked: $SKILL_DIR -> $(pwd)"
+  install_humanizer
+  done_message
+  exit 0
+fi
+
+# Đang là symlink tới repo local → không ghi đè file trong repo (tránh mất thay đổi chưa commit)
+if [ -L "$SKILL_DIR" ]; then
+  echo "Existing symlink detected: $SKILL_DIR -> $(readlink "$SKILL_DIR")"
+  echo "Skipped download to avoid overwriting your local repo. Update it with: git -C \"$(readlink "$SKILL_DIR")\" pull"
+  install_humanizer
+  exit 0
+fi
+
 # Mode: download từ GitHub
 if ! command -v curl &>/dev/null; then
   echo "Error: curl is required. Please install curl and try again."
   exit 1
 fi
 
-# Nếu đang là symlink → chỉ update skill.md tại nguồn, giữ nguyên symlink
-if [ -L "$SKILL_DIR" ] && [ -d "$SKILL_DIR" ]; then
-  echo "Existing symlink detected — updating skill.md at source..."
-  if curl -fsSL "$RAW_URL" -o "$SKILL_DIR/skill.md"; then
-    echo "Updated: $(readlink "$SKILL_DIR")/skill.md"
-    install_humanizer
-    echo ""
-    echo "Done! Restart Claude Code and run /generate-short-bio to get started."
-  else
-    echo "Error: Failed to download skill."
-    exit 1
-  fi
-  exit 0
-fi
-
 mkdir -p "$SKILL_DIR"
 
-echo "Downloading skill.md from GitHub..."
-if curl -fsSL "$RAW_URL" -o "$SKILL_DIR/skill.md"; then
-  echo "Installed to: $SKILL_DIR/skill.md"
+echo "Downloading SKILL.md from GitHub..."
+NEW_FILE="$(mktemp)"
+if download "$RAW_URL" "$NEW_FILE"; then
+  # Bản cũ dùng tên skill.md (chữ thường) — xóa sau khi tải xong để tránh trùng trên filesystem phân biệt hoa thường
+  rm -f "$SKILL_DIR/skill.md"
+  mv "$NEW_FILE" "$SKILL_DIR/SKILL.md"
+  echo "Installed to: $SKILL_DIR/SKILL.md"
   install_humanizer
-  echo ""
-  echo "Done! Restart Claude Code and run /generate-short-bio to get started."
+  done_message
 else
+  rm -f "$NEW_FILE"
   echo "Error: Failed to download skill. Check your internet connection or repo URL."
   exit 1
 fi
-

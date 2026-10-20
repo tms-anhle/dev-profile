@@ -26,7 +26,7 @@ Claude Code skill — Giúp member tự tạo **Short Bio + Core Skills** chuyê
 curl -fsSL https://raw.githubusercontent.com/tms-anhle/dev-profile/master/install.sh | bash
 ```
 
-Script tự phát hiện `skill.md` trong thư mục hiện tại và tạo symlink thay vì download.
+Đang phát triển skill? Clone repo rồi chạy `bash install.sh` trong thư mục repo — script tạo symlink tới repo thay vì download, sửa `SKILL.md` có hiệu lực ngay. Khi đã là symlink, script không ghi đè repo; cập nhật bằng `git pull`.
 
 Script cũng tự cài skill **humanizer** vào `~/.claude/skills/humanizer/` nếu máy chưa có (đã có thì giữ nguyên).
 
@@ -52,10 +52,25 @@ curl -fsSL https://raw.githubusercontent.com/tms-anhle/dev-profile/master/instal
 
 Claude sẽ hỏi tuần tự từng câu một bằng text:
 
-1. **Thông tin của bạn** — nhập tên, role, số năm kinh nghiệm, tech stack
-2. **JD khách hàng** — paste JD vào nếu có, hoặc Enter để bỏ qua
+1. **Thông tin của bạn** — tên, role, số năm kinh nghiệm, tech stack (bắt buộc) + email, ngày sinh, domain, dự án, học vấn (tùy chọn). Thông tin được lưu vào `profile-[ten].md` để dùng lại.
+2. **JD khách hàng** — paste JD vào nếu có, hoặc gõ `skip` để bỏ qua
 3. **Mức độ match** — chỉ hỏi nếu có JD (1/2/3)
-4. **Ngôn ngữ & tên file** — chọn vi/en/ja và tên file output
+
+Bio tiếng Việt được in ra và lưu vào `short-bio-[ten]-[YYYY-MM-DD].md`, sau đó Claude hỏi có muốn tạo thêm bản en / ja không.
+
+### Dùng lại profile cho JD mới
+
+```
+/generate-short-bio --profile profile-nguyen-van-an.md --jd jd-client-a.txt
+```
+
+| Argument | Ý nghĩa |
+|----------|---------|
+| `--profile` | File profile (bỏ qua câu 1) |
+| `--jd` | Nội dung JD hoặc đường dẫn file JD |
+| `--match full\|relative\|general` | Mức độ match (mặc định `full` khi có JD) |
+| `--lang vi\|en\|ja` | Ngôn ngữ bản đầu (mặc định `vi`) |
+| `--output` | Tên file output tùy chỉnh |
 
 ---
 
@@ -63,7 +78,7 @@ Claude sẽ hỏi tuần tự từng câu một bằng text:
 
 ### Hoàn toàn khớp (`full`)
 - Số năm = 100% yêu cầu JD
-- Thay thế ngôn ngữ BE nếu JD yêu cầu khác (Ruby → PHP/Laravel, Ruby → Java/Spring Boot...)
+- Thay thế stack nếu JD yêu cầu khác cùng danh mục (Ruby → PHP/Laravel, React → Vue...)
 - Sinh skill đi kèm theo cấp độ kinh nghiệm (7 năm Java → Spring Cloud, Kafka, JPA...)
 - Core Skills: chỉ liệt kê domain khớp JD
 
@@ -82,21 +97,39 @@ Claude sẽ hỏi tuần tự từng câu một bằng text:
 ## Cấu trúc output
 
 ```markdown
-## Short Bio — [Tên member]
+# [Tên member]
 
-[Đoạn 1 — Nền tảng kỹ thuật]
+**Vị trí:** [Role]
+**Email:** [...]
+**Ngày sinh:** [...]
 
-[Đoạn 2 — Điểm phù hợp / dự án tiêu biểu]
+---
 
-[Đoạn 3 — Kỹ năng mềm]
+## Short Bio
+
+[Đoạn 1 — Role, số năm, stack chính]
+
+[Đoạn 2 — Dự án tiêu biểu, kết quả]
+
+[Đoạn 3 — Cách làm việc]
 
 ---
 
 ## Core Skills
 
-Backend / Framework : ... 
-Database : ... 
+Backend / Framework: Laravel (5 năm), PHP (5 năm)
+Database: MySQL (4 năm), Redis (3 năm)
+
+---
+
+## Project Example
+
+### [Tên dự án]
+**Stack:** [...]
+**Mô tả:** [...]
 ```
+
+Bio viết theo phong cách profile, không dùng đại từ nhân xưng (không tôi/I/私), không gọi tên trong bio. Hỗ trợ role: Backend, Frontend, Fullstack, Mobile, QA.
 
 ---
 
