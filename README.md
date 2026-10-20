@@ -10,7 +10,7 @@ Claude Code skill — Giúp member tự tạo **Short Bio + Core Skills** chuyê
 - **3 mức độ match** — Hoàn toàn / Tương đối / Tổng quát
 - **3 ngôn ngữ output** — Tiếng Việt / English / 日本語
 - **Văn phong tự nhiên** — Short Bio luôn được chạy qua skill [humanizer](https://github.com/blader/humanizer) trước khi xuất
-- **Tự động lưu file** — đặt tên theo developer hoặc tuỳ chỉnh
+- **Tự động lưu file** — đặt tên theo member + ngày (không ghi đè bản cũ cùng ngày) hoặc tuỳ chỉnh
 
 ---
 
@@ -26,9 +26,9 @@ Claude Code skill — Giúp member tự tạo **Short Bio + Core Skills** chuyê
 curl -fsSL https://raw.githubusercontent.com/tms-anhle/dev-profile/master/install.sh | bash
 ```
 
-Đang phát triển skill? Clone repo rồi chạy `bash install.sh` trong thư mục repo — script tạo symlink tới repo thay vì download, sửa `SKILL.md` có hiệu lực ngay. Khi đã là symlink, script không ghi đè repo; cập nhật bằng `git pull`.
+Đang phát triển skill? Clone repo rồi chạy `bash install.sh` trong thư mục repo — script symlink `SKILL.md` của repo vào `~/.claude/skills/generate-short-bio/` thay vì download, sửa `SKILL.md` có hiệu lực ngay. Khi đã là symlink, script không ghi đè repo; cập nhật bằng `git pull`.
 
-Script cũng tự cài skill **humanizer** vào `~/.claude/skills/humanizer/` nếu máy chưa có (đã có thì giữ nguyên).
+Script cũng tự cài skill **humanizer** vào `~/.claude/skills/humanizer/` nếu máy chưa có (đã có thì giữ nguyên). Bản humanizer được pin theo commit để không bị ảnh hưởng khi upstream thay đổi.
 
 Khởi động lại Claude Code sau khi cài.
 
@@ -56,7 +56,7 @@ Claude sẽ hỏi tuần tự từng câu một bằng text:
 2. **JD khách hàng** — paste JD vào nếu có, hoặc gõ `skip` để bỏ qua
 3. **Mức độ match** — chỉ hỏi nếu có JD (1/2/3)
 
-Bio tiếng Việt được in ra và lưu vào `short-bio-[ten]-[YYYY-MM-DD].md`, sau đó Claude hỏi có muốn tạo thêm bản en / ja không.
+Bio tiếng Việt được in ra và lưu vào `short-bio-[ten]-[YYYY-MM-DD].md` ở thư mục hiện tại (trùng tên thì thêm hậu tố `-2`, `-3`...), sau đó Claude hỏi có muốn tạo thêm bản en / ja không.
 
 ### Dùng lại profile cho JD mới
 
@@ -77,13 +77,13 @@ Bio tiếng Việt được in ra và lưu vào `short-bio-[ten]-[YYYY-MM-DD].md
 ## Logic match JD
 
 ### Hoàn toàn khớp (`full`)
-- Số năm = 100% yêu cầu JD
+- Số năm = max(thực tế, yêu cầu JD) — chỉ nâng, không hạ số năm của member
 - Thay thế stack nếu JD yêu cầu khác cùng danh mục (Ruby → PHP/Laravel, React → Vue...)
 - Sinh skill đi kèm theo cấp độ kinh nghiệm (7 năm Java → Spring Cloud, Kafka, JPA...)
 - Core Skills: chỉ liệt kê domain khớp JD
 
 ### Tương đối khớp (`relative`)
-- Số năm = 80–90% yêu cầu JD
+- Số năm = max(thực tế, 80–90% yêu cầu JD)
 - Giữ toàn bộ điểm mạnh, highlight skill khớp JD lên đầu
 - Core Skills: domain khớp JD trước, liệt kê đầy đủ tất cả domain
 

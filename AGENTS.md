@@ -31,9 +31,10 @@ Phần lớn nhất là Bước 2, chia theo ngôn ngữ (vi → en → ja), m�
 | JD skip dùng `skip` / `bỏ qua` / `-`, không dùng Enter | Enter không hoạt động trong Claude Code |
 | Luôn lưu file sau khi in — không hỏi lại | Đã ghi rõ trong Bước 3 |
 | Luôn humanize Short Bio (vi/en/ja) qua skill `humanizer` trước khi in — không còn là option | Ngôn ngữ tự nhiên; ràng buộc của skill (số liệu, không đại từ, 2 câu/đoạn) ưu tiên hơn humanizer |
-| `install.sh` cài kèm `humanizer` (blader/humanizer) nếu chưa có; uninstall không xóa humanizer | Dependency bắt buộc; skill khác có thể dùng chung |
+| `install.sh` cài kèm `humanizer` (blader/humanizer, pin theo commit `HUMANIZER_REF`) nếu chưa có; uninstall không xóa humanizer | Dependency bắt buộc; skill khác có thể dùng chung. Nâng ref thì kiểm tra humanizer vẫn có "embedded mode" |
 | File skill tên `SKILL.md` (chữ hoa) | Linux/WSL phân biệt hoa thường — `skill.md` không được load |
 | Companion skills phải scale theo số năm kinh nghiệm | Tránh skill 1 năm mà có microservices |
+| JD adjustment chỉ nâng số năm, không hạ (`max(thực tế, mốc JD)`) | Không hạ giá trị member senior khi JD yêu cầu ít năm hơn |
 | Cross-role: xóa sạch skill cũ, sinh mới theo role JD | Không pha trộn role gây lộn xộn |
 | Bio không dùng đại từ nhân xưng (ngôi thứ nhất ngầm, phong cách profile): câu không chủ ngữ / mở bằng động từ; không tôi/I/私, bạn/you, anh/chị; không gọi tên trong bio; không né đại từ bằng câu bị động | Hợp cả 3 ngôn ngữ, đúng dù member tự gửi hay BD chuyển cho khách |
 
@@ -62,7 +63,7 @@ Domain 1: Skill A (X năm), Skill B (Y năm)
 ## Project Example   (tối đa 2, bỏ nếu không có)
 ```
 
-Tên file mặc định: `short-bio-[ten-member-kebab]-[YYYY-MM-DD].md` (vi); bản en/ja chèn `-en` / `-ja` trước ngày — kể cả khi `--lang` truyền từ đầu.
+Tên file mặc định: `short-bio-[ten-member-kebab]-[YYYY-MM-DD].md` (vi); bản en/ja chèn `-en` / `-ja` trước ngày — kể cả khi `--lang` truyền từ đầu. Trùng tên → thêm hậu tố `-2`, `-3`..., không ghi đè.
 Nếu user đặt tên thủ công: giữ nguyên tên đó (không append ngày).
 
 Profile member nhập tay được lưu vào `profile-[ten-member-kebab].md` (chưa qua JD adjustment) để dùng lại với `--profile`.

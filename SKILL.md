@@ -15,6 +15,8 @@ Thực hiện **đúng 3 bước theo thứ tự** — không bỏ qua, không �
 
 Arguments:
 - `--profile` — file thông tin của member (thường là file `profile-*.md` đã lưu từ lần trước) → bỏ qua Câu 1, đọc file và validate 4 field như Câu 1; vẫn hỏi Câu 2/Câu 3 nếu chưa truyền `--jd` / `--match`.
+  - File không tồn tại / không đọc được → báo `Không tìm thấy file profile: [đường dẫn]` rồi hỏi Câu 1 như chế độ interactive.
+  - File thiếu field bắt buộc → chỉ hỏi bổ sung field còn thiếu (không hỏi lại toàn bộ Câu 1), sau đó cập nhật lại chính file profile đó.
 - `--jd` — nội dung JD, hoặc đường dẫn file chứa JD (nếu giá trị là file tồn tại → đọc file)
 - `--match full|relative|general` — mặc định `full` nếu có JD
 - `--lang vi|en|ja` — mặc định `vi`, thường bỏ qua (hỏi en/ja sau khi có output)
@@ -55,6 +57,11 @@ Nhập thông tin của bạn để tạo bio:
 
 Nếu thiếu field nào → hỏi lại, merge, validate lại. Chỉ chuyển câu 2 khi đủ cả 4.
 
+**Kiểm tra role** (sau khi đủ 4 field, mỗi trường hợp hỏi 1 câu bằng text):
+- Role member nhập là nguồn chính để chọn bio structure — stack chỉ dùng để kiểm tra chéo (bảng *Nhận diện role* ở Bước 2). Role ghi chung chung ("Software Engineer", "Web Developer") → suy từ stack, không hỏi.
+- Role lệch stack (VD ghi "Fullstack" nhưng stack chỉ có Laravel; ghi "Frontend" nhưng stack toàn Java/Spring) → hỏi xác nhận: `Role bạn ghi là [X] nhưng stack chỉ thấy [Y]. Giữ [X] (bổ sung stack còn thiếu) hay đổi thành [Z]?` — không tự đổi.
+- Role ngoài 5 loại hỗ trợ (DevOps, BrSE, PM, Data/AI, Designer...) → báo skill hiện hỗ trợ Backend / Frontend / Fullstack / Mobile / QA, hỏi member chọn role gần nhất với công việc thực tế hoặc dừng. Không tự map ngầm.
+
 **Lưu profile để dùng lại** — khi đủ 4 field (nhập tay, không áp dụng khi đã dùng `--profile`), lưu ngay thông tin member vào `profile-[ten-member-kebab].md` (thư mục hiện tại, ghi đè nếu đã có) — KHÔNG hỏi lại. Lưu đúng thông tin member nhập, chưa qua JD adjustment:
 ```
 # Profile — [Tên đầy đủ]
@@ -71,6 +78,8 @@ Học vấn: [...]
 [nguyên văn member nhập]
 ```
 Field tùy chọn không có → bỏ dòng đó. Lần sau member chỉ cần `/generate-short-bio --profile profile-[ten].md` kèm JD mới.
+
+**`[ten-member-kebab]`** (dùng cho mọi tên file): bỏ dấu tiếng Việt, `đ`/`Đ` → `d`, chữ thường, khoảng trắng → `-`, bỏ ký tự khác chữ/số. VD: `Lê Thị Mai Anh` → `le-thi-mai-anh`, `Đỗ Đức Thắng` → `do-duc-thang`.
 
 ---
 
@@ -110,6 +119,8 @@ Xác nhận: Profile [Tên member] · JD: [có/không] · Match: [hoàn toàn/t�
 
 ### Nhận diện role
 
+Dùng để kiểm tra chéo role member nhập (Bước 1) và xác định role của JD:
+
 - **Backend** — Ruby on Rails, PHP, Java, Python, Node.js, Go, Spring Boot, Laravel...
 - **Frontend** — Vue.js, React.js, Angular, Next.js (không có BE rõ ràng)
 - **Mobile** — iOS, Android, Flutter, React Native, Swift, Kotlin, Dart, Xcode...
@@ -145,14 +156,18 @@ Match level áp dụng bình thường sau khi đã xác định target role.
 
 **JD adjustment — khi có JD:**
 1. Map profile → JD: tìm skill khớp trực tiếp hoặc liên quan.
-2. Số năm: JD yêu cầu N năm → ghi N năm, áp dụng nhất quán bio + Core Skills.
+2. Số năm — **chỉ nâng, không hạ**: T = số năm thực tế của member, N = mốc JD. Số năm ghi = `max(T, mốc theo match level)` (xem Match levels) — member 8 năm apply JD "3+ năm" vẫn ghi 8 năm. Áp dụng nhất quán bio + Core Skills.
+   - Cách lấy N: "N năm" / "N+ năm" / "tối thiểu N năm" → N; khoảng "A-B năm" → A; JD không ghi số năm → giữ T.
+   - Member nhập khoảng ("3-4 năm") → T lấy cận trên.
+   - Làm tròn về số nguyên gần nhất (.5 làm tròn lên), tối thiểu 1 năm.
+   - Số năm từng skill trong Core Skills ≤ tổng số năm ghi trong bio; companion skill ≤ skill gốc nó đi kèm (VD Laravel 5y → Eloquent ≤ 5y).
 3. Thay stack nếu khác: JD yêu cầu X, profile dùng Y cùng danh mục → ghi X, xóa Y. Framework: PHP → Laravel/Symfony, Java → Spring Boot, Python → Django/FastAPI.
 4. Bổ sung companion skills theo cấp độ.
 5. Bio mở đầu kết nối nhu cầu khách hàng; Core Skills: domain khớp JD lên trước.
 
 **Match levels:**
-- **Hoàn toàn khớp:** số năm 100% JD, chỉ liệt kê skill/domain khớp JD.
-- **Tương đối khớp:** số năm 80-90% JD, giữ toàn bộ điểm mạnh.
+- **Hoàn toàn khớp:** số năm = `max(T, N)`, chỉ liệt kê skill/domain khớp JD.
+- **Tương đối khớp:** số năm = `max(T, 80-90% × N)` (làm tròn như trên), giữ toàn bộ điểm mạnh.
 - **Tổng quát:** giữ nguyên số năm thực tế, JD làm gợi ý nhẹ.
 - **Không có JD:** bio tổng quát, chỉ dùng skill có trong profile — không bổ sung companion skills.
 
@@ -194,7 +209,7 @@ Match level áp dụng bình thường sau khi đã xác định target role.
 *Backend / Frontend / Fullstack:*
 - Đoạn 1: role, tổng năm, stack chính, lĩnh vực cốt lõi.
 - Đoạn 2: dự án/kinh nghiệm tiêu biểu, quy mô, kết quả, skill bổ sung tự nhiên.
-- Đoạn 3: mindset, chủ động, teamwork, chất lượng code.
+- Đoạn 3: cách làm việc — review code, viết test, phối hợp FE/QA, chủ động đề xuất cải tiến.
 
 *Mobile:*
 - Đoạn 1: role, số năm, platform chính, loại app. Nếu JD: kết nối nhu cầu platform khách hàng.
@@ -205,6 +220,8 @@ Match level áp dụng bình thường sau khi đã xác định target role.
 - Đoạn 1: role, số năm QA, loại testing chính, domain. Nếu JD: kết nối yêu cầu testing.
 - Đoạn 2: dự án tiêu biểu, coverage, công cụ nổi bật, phối hợp dev cycle. **KHÔNG đề cập CI/CD setup** — QA chỉ chạy test trong pipeline, không sở hữu infrastructure.
 - Đoạn 3: tư duy chất lượng, phối hợp dev team, phát hiện bug sớm, process improvement.
+
+*Đoạn 3 — mọi role:* viết bằng hành động cụ thể, có bối cảnh hoặc kết quả, không câu mindset chung chung. Tránh: "Luôn đặt chất lượng lên hàng đầu và có tinh thần trách nhiệm cao." Viết: "Thống nhất API contract với frontend ngay đầu sprint, giảm rework khi tích hợp." Profile không có chi tiết cách làm việc → rút ra từ dự án đã nêu, không bịa.
 
 **Core Skills domains:**
 - BE/FE/Fullstack: Backend/Framework, Frontend, Database, Caching, DevOps/CI/CD, Cloud, AI — mỗi domain trên 1 dòng, skill liệt kê inline kèm số năm.
@@ -342,7 +359,9 @@ Output theo định dạng chuẩn — giữ nguyên thứ tự, không bỏ sec
 - en: `short-bio-[ten-member-kebab]-en-[YYYY-MM-DD].md`
 - ja: `short-bio-[ten-member-kebab]-ja-[YYYY-MM-DD].md`
 
-Nếu có `--output`: giữ nguyên tên user đặt (không append ngày); bản ngôn ngữ thêm sau chèn `-en` / `-ja` trước đuôi `.md`.
+**Trùng tên — KHÔNG ghi đè** (VD: cùng ngày tạo bio cho 2 JD khác nhau): nếu file tên tự sinh đã tồn tại → thêm hậu tố `-2`, `-3`... trước `.md` (VD `short-bio-le-thi-mai-anh-2026-10-20-2.md`). Bản en/ja tạo thêm sau trong cùng lượt dùng cùng hậu tố với bản đầu (VD `...-en-2026-10-20-2.md`); nếu tên đó cũng đã có thì tăng tiếp.
+
+Nếu có `--output`: giữ nguyên tên user đặt (không append ngày, ghi đè nếu đã có — user chủ động chọn tên); bản ngôn ngữ thêm sau chèn `-en` / `-ja` trước đuôi `.md`.
 
 **Sau khi lưu**, hỏi tiếp bằng text (cùng nguyên tắc hỏi tuần tự ở Bước 1 — không dùng `AskUserQuestion`). Chỉ liệt kê các ngôn ngữ vi/en/ja chưa tạo (bản đầu là en/ja thì vẫn có option `vi`).
 
