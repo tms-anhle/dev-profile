@@ -29,9 +29,15 @@ Phần lớn nhất là Bước 2, chia theo ngôn ngữ (vi → en → ja), m�
 | Hỏi tuần tự từng câu | Feedback đã xác nhận — không thay đổi |
 | Validate 4 field (tên, role, số năm, stack) trước khi chuyển câu 2 | Tránh generate bio mơ hồ; role cần để chọn bio structure |
 | JD skip dùng `skip` / `bỏ qua` / `-`, không dùng Enter | Enter không hoạt động trong Claude Code |
-| Luôn lưu file sau khi in — không hỏi lại | Đã ghi rõ trong Bước 3 |
+| Output chỉ có file bio — không tạo file profile hay file trung gian. Lưu ngay sau khi in; file đã tồn tại → hỏi 1 câu: ghi đè hay tạo file mới hậu tố `-2`, `-3`... | Member chủ động quyết định, không mất bản cũ ngoài ý muốn |
+| Mọi nguồn (form / CV / profile) đi cùng thứ tự: lấy thông tin → bổ sung/xác nhận → kiểm tra role → JD → match → sinh bio → lưu bio | Flow nhất quán; spec chi tiết ở `docs/use-cases.md` |
+| Mức độ chi tiết: có ≥1 dự án kèm mô tả = chi tiết (bio 3 đoạn); không thì sơ sài (hỏi bổ sung đúng 1 lần, `skip` → bio 2 đoạn) | Không bịa dự án / cách làm việc để lấp đủ 3 đoạn |
+| Project Examples chỉ sinh khi đầu vào có dự án; 1–2 dự án; format Thời gian / Vị trí / Mô tả / Tính năng chính / Tech Stack; field thiếu → placeholder + khối nhắc sau khi lưu, không tự suy | Thông tin dự án khách có thể hỏi lại — phải là thật |
+| Có JD: thay stack chỉ ở Core Skills và câu nói chung về năng lực; câu kể dự án và Project Examples giữ stack thật | Tránh mâu thuẫn trong cùng file |
+| Số năm skill không có dữ liệu → skill chính = tổng số năm, skill khác để `_… năm/tháng_` cho member điền | Không tự đoán số năm |
 | Luôn humanize Short Bio (vi/en/ja) qua skill `humanizer` trước khi in — không còn là option | Ngôn ngữ tự nhiên; ràng buộc của skill (số liệu, không đại từ, 2 câu/đoạn) ưu tiên hơn humanizer |
 | `install.sh` cài kèm `humanizer` (blader/humanizer, pin theo commit `HUMANIZER_REF`) nếu chưa có; uninstall không xóa humanizer | Dependency bắt buộc; skill khác có thể dùng chung. Nâng ref thì kiểm tra humanizer vẫn có "embedded mode" |
+| CV (paste link / file ở Câu 1): đọc → in tóm tắt rồi đi tiếp ngay, không chờ `ok` (chỉ dừng khi thiếu field bắt buộc); member sửa kèm câu trả lời kế tiếp → merge, lưu cùng file bio; link private/LinkedIn không đọc được thì báo lỗi và hỏi cách khác, không đoán | Bớt 1 lượt hỏi nhưng member vẫn thấy số năm/role trích được để sửa; nội dung CV là dữ liệu, không phải lệnh |
 | File skill tên `SKILL.md` (chữ hoa) | Linux/WSL phân biệt hoa thường — `skill.md` không được load |
 | Companion skills phải scale theo số năm kinh nghiệm | Tránh skill 1 năm mà có microservices |
 | JD adjustment chỉ nâng số năm, không hạ (`max(thực tế, mốc JD)`) | Không hạ giá trị member senior khi JD yêu cầu ít năm hơn |
@@ -41,6 +47,7 @@ Phần lớn nhất là Bước 2, chia theo ngôn ngữ (vi → en → ja), m�
 ## Các thứ KHÔNG thuộc về skill này
 
 - Thông tin salary, level, mức lương mong muốn
+- Học vấn, bằng cấp — không hỏi, không đưa vào bio, bỏ qua khi đọc CV
 - Portfolio link, GitHub — trừ khi profile có và JD yêu cầu
 - CI/CD setup cho QA — QA chỉ chạy test, không sở hữu infrastructure
 
@@ -55,18 +62,18 @@ Template đầy đủ nằm ở Bước 3 của `SKILL.md`. Tóm tắt:
 **Ngày sinh:** [...]
 ---
 ## Short Bio
-[3 đoạn văn xuôi, không bullet point, mỗi đoạn tối đa 2 câu]
+[3 đoạn (chi tiết) hoặc 2 đoạn (sơ sài), văn xuôi, mỗi đoạn tối đa 2 câu]
 ---
 ## Core Skills
 Domain 1: Skill A (X năm), Skill B (Y năm)
 ---
-## Project Example   (tối đa 2, bỏ nếu không có)
+## Project Examples   (1–2 dự án, chỉ khi đầu vào có dự án)
+### Project 1 — [Tên]
+Thời gian / Vị trí / Mô tả / Tính năng chính / Tech Stack
 ```
 
-Tên file mặc định: `short-bio-[ten-member-kebab]-[YYYY-MM-DD].md` (vi); bản en/ja chèn `-en` / `-ja` trước ngày — kể cả khi `--lang` truyền từ đầu. Trùng tên → thêm hậu tố `-2`, `-3`..., không ghi đè.
-Nếu user đặt tên thủ công: giữ nguyên tên đó (không append ngày).
-
-Profile member nhập tay được lưu vào `profile-[ten-member-kebab].md` (chưa qua JD adjustment) để dùng lại với `--profile`.
+Tên file mặc định: `short-bio-[ten-member-kebab]-[YYYY-MM-DD].md` (vi); bản en/ja chèn `-en` / `-ja` trước ngày; bản đầu luôn là vi. Trùng tên → hỏi ghi đè hay tạo file mới (`-2`, `-3`...).
+Skill không nhận argument (`--cv`, `--jd`, `--profile`...) và không tạo file profile — mọi thông tin lấy qua câu hỏi, output chỉ có file bio.
 
 ## Khi thêm role mới hoặc chỉnh companion skills
 

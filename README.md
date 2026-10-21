@@ -10,6 +10,7 @@ Claude Code skill — Giúp member tự tạo **Short Bio + Core Skills** chuyê
 - **3 mức độ match** — Hoàn toàn / Tương đối / Tổng quát
 - **3 ngôn ngữ output** — Tiếng Việt / English / 日本語
 - **Văn phong tự nhiên** — Short Bio luôn được chạy qua skill [humanizer](https://github.com/blader/humanizer) trước khi xuất
+- **Đọc thông tin từ CV** — paste link CV (Google Docs / Sheets / Drive / PDF) hoặc file CV thay vì nhập tay
 - **Tự động lưu file** — đặt tên theo member + ngày (không ghi đè bản cũ cùng ngày) hoặc tuỳ chỉnh
 
 ---
@@ -44,7 +45,7 @@ curl -fsSL https://raw.githubusercontent.com/tms-anhle/dev-profile/master/instal
 
 ## Cách dùng
 
-### Chế độ interactive (không có args)
+### Chạy skill
 
 ```
 /generate-short-bio
@@ -52,25 +53,11 @@ curl -fsSL https://raw.githubusercontent.com/tms-anhle/dev-profile/master/instal
 
 Claude sẽ hỏi tuần tự từng câu một bằng text:
 
-1. **Thông tin của bạn** — tên, role, số năm kinh nghiệm, tech stack (bắt buộc) + email, ngày sinh, domain, dự án, học vấn (tùy chọn). Thông tin được lưu vào `profile-[ten].md` để dùng lại.
-2. **JD khách hàng** — paste JD vào nếu có, hoặc gõ `skip` để bỏ qua
+1. **Thông tin của bạn** — tên, role, số năm kinh nghiệm, tech stack (bắt buộc) + email, ngày sinh, domain, dự án (tùy chọn). Có thể paste link CV (Google Docs / Sheets / Drive / PDF) hoặc đường dẫn file CV thay vì gõ tay (link phải bật chia sẻ "Anyone with the link"; LinkedIn cần đăng nhập nên không đọc được) — Claude đọc CV, in thông tin trích được rồi đi tiếp luôn (cần sửa thì nhắn kèm câu trả lời tiếp theo). Học vấn không được dùng. Nếu thông tin sơ sài (chưa có dự án kèm mô tả), Claude hỏi bổ sung một lần — gõ `skip` để bỏ qua.
+2. **JD khách hàng** — paste nội dung, link hoặc đường dẫn file JD nếu có, hoặc gõ `skip` để bỏ qua
 3. **Mức độ match** — chỉ hỏi nếu có JD (1/2/3)
 
-Bio tiếng Việt được in ra và lưu vào `short-bio-[ten]-[YYYY-MM-DD].md` ở thư mục hiện tại (trùng tên thì thêm hậu tố `-2`, `-3`...), sau đó Claude hỏi có muốn tạo thêm bản en / ja không.
-
-### Dùng lại profile cho JD mới
-
-```
-/generate-short-bio --profile profile-nguyen-van-an.md --jd jd-client-a.txt
-```
-
-| Argument | Ý nghĩa |
-|----------|---------|
-| `--profile` | File profile (bỏ qua câu 1) |
-| `--jd` | Nội dung JD hoặc đường dẫn file JD |
-| `--match full\|relative\|general` | Mức độ match (mặc định `full` khi có JD) |
-| `--lang vi\|en\|ja` | Ngôn ngữ bản đầu (mặc định `vi`) |
-| `--output` | Tên file output tùy chỉnh |
+Bio tiếng Việt được in ra và lưu vào `short-bio-[ten]-[YYYY-MM-DD].md` ở thư mục hiện tại (file đã tồn tại thì Claude hỏi ghi đè hay tạo file mới `-2`, `-3`...). Nếu file còn thông tin thiếu, Claude liệt kê để bạn bổ sung trước khi gửi khách, sau đó hỏi có muốn tạo thêm bản en / ja không.
 
 ---
 
@@ -111,7 +98,7 @@ Bio tiếng Việt được in ra và lưu vào `short-bio-[ten]-[YYYY-MM-DD].md
 
 [Đoạn 2 — Dự án tiêu biểu, kết quả]
 
-[Đoạn 3 — Cách làm việc]
+[Đoạn 3 — Cách làm việc]   ← thông tin sơ sài chỉ có 2 đoạn
 
 ---
 
@@ -122,12 +109,18 @@ Database: MySQL (4 năm), Redis (3 năm)
 
 ---
 
-## Project Example
+## Project Examples   ← chỉ có khi đầu vào có dự án (1–2 dự án)
 
-### [Tên dự án]
-**Stack:** [...]
+### Project 1 — Labofi
+**Thời gian:** 8 tháng
+**Vị trí:** Frontend Developer
 **Mô tả:** [...]
+**Tính năng chính:**
+- [...]
+**Tech Stack:** Next.js, Apollo GraphQL, MUI, Tailwind CSS
 ```
+
+Thông tin thiếu được để placeholder `_(chưa có — vui lòng bổ sung)_` và liệt kê lại sau khi lưu file. Chi tiết từng use case: [`docs/use-cases.md`](docs/use-cases.md).
 
 Bio viết theo phong cách profile, không dùng đại từ nhân xưng (không tôi/I/私), không gọi tên trong bio. Hỗ trợ role: Backend, Frontend, Fullstack, Mobile, QA.
 
