@@ -113,8 +113,11 @@ mkdir -p "$SKILL_DIR"
 echo "Downloading SKILL.md from GitHub..."
 NEW_FILE="$(mktemp)"
 if download "$RAW_URL" "$NEW_FILE"; then
-  # Bản cũ dùng tên skill.md (chữ thường) — xóa sau khi tải xong để tránh trùng trên filesystem phân biệt hoa thường
-  rm -f "$SKILL_DIR/skill.md"
+  # Bản cũ dùng tên skill.md (chữ thường) — chỉ xóa khi tên lưu trên đĩa đúng là chữ thường.
+  # Không `rm -f skill.md` vô điều kiện: trên macOS (không phân biệt hoa thường) lệnh đó xóa luôn SKILL.md.
+  if ls -1 "$SKILL_DIR" 2>/dev/null | grep -qx 'skill.md'; then
+    rm -f "$SKILL_DIR/skill.md"
+  fi
   mv "$NEW_FILE" "$SKILL_DIR/SKILL.md"
   echo "Installed to: $SKILL_DIR/SKILL.md"
   install_humanizer
